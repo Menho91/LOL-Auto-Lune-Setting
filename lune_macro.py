@@ -3,43 +3,20 @@ from bs4 import BeautifulSoup
 import time
 import pyautogui as mouse
 
-champion_list = []
-champion_eng_list = []
+champion_list = {}
+current_lune = []
+point_list = []
+current_champion = ""
 
 # load champion name list from file
-with open("champion.txt", "r", encoding="UTF-8") as file:
-    for line in file:
-        champion_list.append(line.replace("\n", ""))
-with open("champion_eng.txt", "r") as file2:
-    for line in file2:
-        if line.replace("\n", "").isalpha() == False:
-            output = ""
-            for i in range(0, len(line)):
-                if line[i].isalpha() == True:
-                    output += line[i]
-            champion_eng_list.append(output)
-        else:
-            champion_eng_list.append(line.replace("\n", ""))
-
-# input selected champion name
-while 1:
-    champion = input("챔피언 이름을 입력하세요> ")
-    if champion not in champion_list:
-        print("챔피언 이름을 정확하게 입력해주세요.")
-    else:
-        break
-print("{}을(를) 골랐습니다.".format(champion))
+def champion_read():
+    with open("champion.txt", "r", encoding="UTF-8") as file:
+        for line in file:
+            champ = line.strip().split(";")
+            champion_list[champ[0]] = champ[1]
 
 # select mode, and load lune info of selected champion
-trans_dic = {}
-for i in range(0, len(champion_list)):
-    trans_dic[champion_list[i]] = champion_eng_list[i]
-
-def translator(name):
-    return trans_dic[name]
-
-current_lune = []
-def normalmode():
+def normalmode(champ):
     while 1:
         position = ""
         while 1:
@@ -62,7 +39,7 @@ def normalmode():
             else:
                 print("포지션 이름을 정확히 입력해주세요.")
         try:
-            target = request.urlopen("https://poro.gg/champions/{}/sr/{}".format(translator(champion), position))
+            target = request.urlopen(f"https://poro.gg/champions/{champ}/sr/{position}")
             soup = BeautifulSoup(target, "html.parser")
             output1 = soup.select("div.champion-rune-builds .active", limit=11)
             if output1 == []:
@@ -75,16 +52,16 @@ def normalmode():
                 current_lune.append(output["alt"])
             break
 
-def kalbaram():
-    target = request.urlopen("https://poro.gg/champions/{}/aram".format(translator(champion)))
+def kalbaram(champ):
+    target = request.urlopen(f"https://poro.gg/champions/{champ}/aram")
     soup = BeautifulSoup(target, "html.parser")
     output1 = soup.select("div.champion-rune-builds .active", limit=11)
     for img in output1:
         output = img.attrs
         current_lune.append(output["alt"])
 
-def urfmode():
-    target = request.urlopen("https://poro.gg/champions/{}/urf".format(translator(champion)))
+def urfmode(champ):
+    target = request.urlopen(f"https://poro.gg/champions/{champ}/urf")
     soup = BeautifulSoup(target, "html.parser")
     output1 = soup.select("div.champion-rune-builds .active", limit=11)
     for img in output1:
@@ -92,8 +69,6 @@ def urfmode():
         current_lune.append(output["alt"])
 
 # invert loaded lune info to mouse point values
-point_list = []
-
 def lune_to_point(arg):
     point_list.clear()
     if arg[0] == "정밀":
@@ -251,20 +226,30 @@ def click_point(arg):
 
 # make a function that executes
 def execute():
+    champion_read()
+    while 1:
+        tmp_input = input("챔피언 이름을 입력하세요> ")
+        if tmp_input not in champion_list.keys():
+            print("챔피언 이름을 정확하게 입력해주세요.")
+        else:
+            break
+    current_champion = tmp_input
+    print(f"{current_champion}을(를) 골랐습니다.")
+
     while 1:
         input_name = input("모드를 입력하세요.(협곡, 칼바람, 우르프) > ")
         if input_name == "칼바람":
-            kalbaram()
+            kalbaram(champion_list[current_champion])
             lune_to_point(current_lune)
             click_point(point_list)
             break
         if input_name == "협곡":
-            normalmode()
+            normalmode(champion_list[current_champion])
             lune_to_point(current_lune)
             click_point(point_list)
             break
         if input_name == "우르프":
-            urfmode()
+            urfmode(champion_list[current_champion])
             lune_to_point(current_lune)
             click_point(point_list)
             break
