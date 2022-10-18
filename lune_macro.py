@@ -59,7 +59,7 @@ def kalbaram(champ):
     for img in output1:
         output = img.attrs
         current_lune.append(output["alt"])
-
+    
 def urfmode(champ):
     target = request.urlopen(f"https://poro.gg/champions/{champ}/urf")
     soup = BeautifulSoup(target, "html.parser")
