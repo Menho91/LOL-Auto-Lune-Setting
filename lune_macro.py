@@ -37,7 +37,7 @@ def normalmode():
                 position = "top"
                 break
             elif position_kr == "정글":
-                position = "jng"
+                position = "jungle"
                 break
             elif position_kr == "미드":
                 position = "mid"
@@ -46,7 +46,7 @@ def normalmode():
                 position = "adc"
                 break
             elif position_kr == "서폿":
-                position = "sup"
+                position = "support"
                 break
             else:
                 print("포지션 이름을 정확히 입력해주세요.")
@@ -60,9 +60,6 @@ def normalmode():
             html = res.text
             soup = BeautifulSoup(html, "html.parser")
             output1 = soup.select("div.item img")
-            if output1 == []:
-                print(f"{position_kr} 포지션의 챔피언 정보가 부족합니다.")
-                continue
             for tags in output1:
                 if "grayscale" not in tags["src"]:
                     print(tags["alt"])
@@ -210,30 +207,30 @@ def lune_to_point(arg):
         point_list.append((1064, 642))
     else:
         pass
-    if arg[8] == "Adaptive":
-        point_list.append((888, 716))
-    elif arg[8] == "AttackSpeed":
-        point_list.append((971, 716))
-    elif arg[8] == "CDRScaling":
-        point_list.append((1053, 716))
-    else:
-        pass
-    if arg[9] == "Adaptive":
-        point_list.append((888, 771))
-    elif arg[9] == "Armor":
-        point_list.append((971, 771))
-    elif arg[9] == "MagicRes":
-        point_list.append((1053, 771))
-    else:
-        pass
-    if arg[10] == "HealthScaling":
-        point_list.append((888, 823))
-    elif arg[10] == "Armor":
-        point_list.append((971, 823))
-    elif arg[10] == "MagicRes":
-        point_list.append((1053, 823))
-    else:
-        pass
+    # if arg[8] == "Adaptive":
+    #     point_list.append((888, 716))
+    # elif arg[8] == "AttackSpeed":
+    #     point_list.append((971, 716))
+    # elif arg[8] == "CDRScaling":
+    #     point_list.append((1053, 716))
+    # else:
+    #     pass
+    # if arg[9] == "Adaptive":
+    #     point_list.append((888, 771))
+    # elif arg[9] == "Armor":
+    #     point_list.append((971, 771))
+    # elif arg[9] == "MagicRes":
+    #     point_list.append((1053, 771))
+    # else:
+    #     pass
+    # if arg[10] == "HealthScaling":
+    #     point_list.append((888, 823))
+    # elif arg[10] == "Armor":
+    #     point_list.append((971, 823))
+    # elif arg[10] == "MagicRes":
+    #     point_list.append((1053, 823))
+    # else:
+    #     pass
 
 # click as the mouse point values
 def click_point(arg):
