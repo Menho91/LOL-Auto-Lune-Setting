@@ -1,4 +1,5 @@
 from urllib import request
+import requests
 from bs4 import BeautifulSoup
 import time
 import pyautogui as mouse
@@ -6,7 +7,6 @@ import pyautogui as mouse
 champion_list = {}
 current_lune = []
 point_list = []
-current_champion = ""
 
 # load champion name list from file
 def champion_read():
@@ -15,9 +15,21 @@ def champion_read():
             champ = line.strip().split(";")
             champion_list[champ[0]] = champ[1]
 
-# select mode, and load lune info of selected champion
-def normalmode(champ):
+# select champion
+def champion_select():
     while 1:
+        champ = input("챔피언 이름을 입력하세요 > ")
+        if champ not in champion_list.keys():
+            print("챔피언 이름을 정확하게 입력해주세요.")
+        else:
+            break
+    print(f"{champ}을(를) 골랐습니다.")
+    return champion_list[champ]
+
+# select mode, and load lune info of selected champion
+def normalmode():
+    while 1:
+        # select position
         position = ""
         while 1:
             position_kr = input("포지션을 입력하세요.(탑, 정글, 미드, 원딜, 서폿) > ")
@@ -38,29 +50,39 @@ def normalmode(champ):
                 break
             else:
                 print("포지션 이름을 정확히 입력해주세요.")
-        try:
-            target = request.urlopen(f"https://poro.gg/champions/{champ}/sr/{position}")
-            soup = BeautifulSoup(target, "html.parser")
-            output1 = soup.select("div.champion-rune-builds .active", limit=11)
+
+        # search information
+        champ = champion_select()
+        URL = f"https://www.op.gg/champions/{champ}/{position}/build?region=global&tier=platinum_plus"
+        hdr = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': ('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
+        res = requests.get(URL, headers=hdr)
+        if res.status_code == 200:
+            html = res.text
+            soup = BeautifulSoup(html, "html.parser")
+            output1 = soup.select("div.item img")
             if output1 == []:
-                raise NameError
-        except NameError:
-            print("해당 포지션의 정보가 부족합니다.")
+                print(f"{position_kr} 포지션의 챔피언 정보가 부족합니다.")
+                continue
+            for tags in output1:
+                if "grayscale" not in tags["src"]:
+                    print(tags["alt"])
+                    current_lune.append(tags["alt"])
+            break
         else:
-            for img in output1:
-                output = img.attrs
-                current_lune.append(output["alt"])
+            print("오류가 발생했습니다. 오류코드 :", res.status_code)
             break
 
-def kalbaram(champ):
+def kalbaram():
+    champ = champion_select()
     target = request.urlopen(f"https://poro.gg/champions/{champ}/aram")
     soup = BeautifulSoup(target, "html.parser")
     output1 = soup.select("div.champion-rune-builds .active", limit=11)
     for img in output1:
         output = img.attrs
         current_lune.append(output["alt"])
-    
+
 def urfmode(champ):
+    champ = champion_select()
     target = request.urlopen(f"https://poro.gg/champions/{champ}/urf")
     soup = BeautifulSoup(target, "html.parser")
     output1 = soup.select("div.champion-rune-builds .active", limit=11)
@@ -228,28 +250,19 @@ def click_point(arg):
 def execute():
     champion_read()
     while 1:
-        tmp_input = input("챔피언 이름을 입력하세요> ")
-        if tmp_input not in champion_list.keys():
-            print("챔피언 이름을 정확하게 입력해주세요.")
-        else:
-            break
-    current_champion = tmp_input
-    print(f"{current_champion}을(를) 골랐습니다.")
-
-    while 1:
         input_name = input("모드를 입력하세요.(협곡, 칼바람, 우르프) > ")
         if input_name == "칼바람":
-            kalbaram(champion_list[current_champion])
+            kalbaram()
             lune_to_point(current_lune)
             click_point(point_list)
             break
         if input_name == "협곡":
-            normalmode(champion_list[current_champion])
+            normalmode()
             lune_to_point(current_lune)
             click_point(point_list)
             break
         if input_name == "우르프":
-            urfmode(champion_list[current_champion])
+            urfmode()
             lune_to_point(current_lune)
             click_point(point_list)
             break
