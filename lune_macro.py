@@ -62,7 +62,6 @@ def normalmode():
             output1 = soup.select("div.item img")
             for tags in output1:
                 if "grayscale" not in tags["src"]:
-                    print(tags["alt"])
                     current_lune.append(tags["alt"])
             break
         else:
@@ -71,21 +70,33 @@ def normalmode():
 
 def kalbaram():
     champ = champion_select()
-    target = request.urlopen(f"https://poro.gg/champions/{champ}/aram")
-    soup = BeautifulSoup(target, "html.parser")
-    output1 = soup.select("div.champion-rune-builds .active", limit=11)
-    for img in output1:
-        output = img.attrs
-        current_lune.append(output["alt"])
+    URL = f"https://www.op.gg/modes/aram/{champ}/build"
+    hdr = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': ('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
+    res = requests.get(URL, headers=hdr)
+    if res.status_code == 200:
+        html = res.text
+        soup = BeautifulSoup(html, "html.parser")
+        output1 = soup.select("div.item img")
+        for tags in output1:
+            if "grayscale" not in tags["src"]:
+                current_lune.append(tags["alt"])
+    else:
+        print("오류가 발생했습니다. 오류코드 :", res.status_code)
 
-def urfmode(champ):
+def urfmode():
     champ = champion_select()
-    target = request.urlopen(f"https://poro.gg/champions/{champ}/urf")
-    soup = BeautifulSoup(target, "html.parser")
-    output1 = soup.select("div.champion-rune-builds .active", limit=11)
-    for img in output1:
-        output = img.attrs
-        current_lune.append(output["alt"])
+    URL = f"https://www.op.gg/modes/urf/{champ}/build?region=global"
+    hdr = {'Accept-Language': 'ko_KR,en;q=0.8', 'User-Agent': ('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Mobile Safari/537.36')}
+    res = requests.get(URL, headers=hdr)
+    if res.status_code == 200:
+        html = res.text
+        soup = BeautifulSoup(html, "html.parser")
+        output1 = soup.select("div.item img")
+        for tags in output1:
+            if "grayscale" not in tags["src"]:
+                current_lune.append(tags["alt"])
+    else:
+        print("오류가 발생했습니다. 오류코드 :", res.status_code)
 
 # invert loaded lune info to mouse point values
 def lune_to_point(arg):
